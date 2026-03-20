@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Career Guidance AI</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark"></div>
+          <div>
+            <div class="brand-title">Career Guidance AI</div>
+            <div class="brand-subtitle">Voice + AI suggestions</div>
+          </div>
+        </div>
+
+        <div class="lang-wrap">
+          <label class="lang-label" for="languageSelect">Language</label>
+          <select id="languageSelect" class="select">
+            <option value="en">English</option>
+            <option value="ta">தமிழ்</option>
+          </select>
+        </div>
+      </header>
+
+      <main class="main">
+        <!-- HOME -->
+        <section id="homeView" class="view active">
+          <div class="hero">
+            <div class="hero-text">
+              <h1 id="homeTitle">Find the right career path</h1>
+              <p id="homeSubtitle">
+                Answer a few questions (voice or typing), then get 3–5 career suggestions with a learning path.
+              </p>
+            </div>
+
+            <div class="hero-actions">
+              <button id="startBtn" class="btn primary">Start Career Guidance</button>
+              <button id="micHomeBtn" class="icon-btn mic-btn" aria-label="Start voice guidance">
+                <span class="mic-icon">🎙️</span>
+                <span class="mic-pulse"></span>
+              </button>
+              <div class="hint" id="homeHint">
+                Voice works best in Chrome.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- QUESTIONS -->
+        <section id="questionsView" class="view">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title" id="qTitle">Career Questions</div>
+                <div class="panel-subtitle" id="qSubTitle">Step <span id="qStep">1</span> of <span id="qTotal">7</span></div>
+              </div>
+
+              <div class="voice-status" id="voiceStatus" aria-live="polite"></div>
+            </div>
+
+            <div class="question-block">
+              <div class="question-text" id="questionPrompt">Question goes here</div>
+
+              <div class="input-row">
+                <textarea
+                  id="answerInput"
+                  class="textarea"
+                  rows="4"
+                  placeholder="Type your answer here..."
+                ></textarea>
+
+                <button id="micAnswerBtn" class="icon-btn mic-btn small" aria-label="Speak answer">
+                  <span class="mic-icon">🎤</span>
+                  <span class="mic-pulse"></span>
+                </button>
+              </div>
+
+              <div class="actions-row">
+                <button id="backBtn" class="btn ghost">Back</button>
+                <button id="nextBtn" class="btn primary">Next</button>
+              </div>
+
+              <div id="sttSupportHint" class="support-hint"></div>
+            </div>
+
+            <div class="avatar-area">
+              <div class="avatar" aria-hidden="true"></div>
+              <div class="typing-bubble" id="typingBubble" style="display:none;">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- RESULTS -->
+        <section id="resultsView" class="view">
+          <div class="results-head">
+            <div>
+              <div class="panel-title" id="resultsTitle">Career Suggestions</div>
+              <div class="panel-subtitle" id="resultsSubtitle">Saved session will be used for chatbot follow-ups.</div>
+            </div>
+            <div class="results-actions">
+              <button id="readAloudBtn" class="btn ghost">Read aloud</button>
+              <button id="downloadPdfBtn" class="btn primary">Download PDF</button>
+            </div>
+          </div>
+
+          <div class="content-grid">
+            <div class="cards" id="cardsContainer"></div>
+
+            <aside class="chat-panel">
+              <div class="chat-head">
+                <div>
+                  <div class="chat-title" id="chatTitle">Career Chatbot</div>
+                  <div class="chat-subtitle" id="chatSubtitle">Ask follow-up questions.</div>
+                </div>
+                <div class="session-id" id="sessionIdDisplay"></div>
+              </div>
+
+              <div class="chat-messages" id="chatMessages"></div>
+
+              <form id="chatForm" class="chat-form">
+                <input id="chatInput" class="chat-input" placeholder="Type your question..." autocomplete="off" />
+                <button class="btn primary" type="submit">Send</button>
+              </form>
+
+              <div class="chat-footer">
+                <button id="chatReadAloudBtn" class="btn ghost small">Read last reply</button>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- LOADING OVERLAY -->
+        <div id="loadingOverlay" class="loading-overlay" style="display:none;">
+          <div class="loading-card">
+            <div class="spinner" aria-hidden="true"></div>
+            <div class="loading-text" id="loadingText">AI is thinking...</div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- App scripts (order matters) -->
+    <script src="i18n.js"></script>
+    <script src="api.js"></script>
+    <script src="pdf.js"></script>
+    <script src="voice.js"></script>
+    <script src="chat.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
+
