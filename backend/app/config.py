@@ -1,4 +1,14 @@
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+
+# Load backend/.env automatically for local development.
+# (So users don't need to set environment variables in PowerShell.)
+dotenv_path = Path(__file__).resolve().parent.parent / ".env"
+if dotenv_path.exists():
+    load_dotenv(dotenv_path=dotenv_path)
 
 
 class Settings:

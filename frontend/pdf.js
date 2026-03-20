@@ -46,14 +46,27 @@ window.PdfUtil = (() => {
     y += 14;
     doc.setFont(undefined, "normal");
 
+    function formatAnswer(v) {
+      if (v === null || v === undefined) return "";
+      if (Array.isArray(v)) return v.join(", ");
+      if (typeof v === "object") {
+        // Handle skills level map like {skillId: "beginner", ...}
+        return Object.entries(v)
+          .map(([k, lvl]) => `${k}: ${lvl}`)
+          .join(", ");
+      }
+      return v.toString();
+    }
+
     const answerLines = [
-      `Interests: ${studentAnswers?.interests || ""}`,
-      `Subjects: ${studentAnswers?.subjects || ""}`,
-      `Skills: ${studentAnswers?.skills || ""}`,
-      `Personality: ${studentAnswers?.personality || ""}`,
-      `Workstyle: ${studentAnswers?.workstyle || ""}`,
-      `Goals: ${studentAnswers?.goals || ""}`,
-      `Education level: ${studentAnswers?.educationLevel || ""}`,
+      `Interests: ${formatAnswer(studentAnswers?.interests)}`,
+      `Skills: ${formatAnswer(studentAnswers?.skills)}`,
+      `Personality: ${formatAnswer(studentAnswers?.personality)}`,
+      `Workstyle: ${formatAnswer(studentAnswers?.workstyle)}`,
+      `Risk appetite: ${formatAnswer(studentAnswers?.risk)}`,
+      `Learning style: ${formatAnswer(studentAnswers?.learningStyle)}`,
+      `Motivation: ${formatAnswer(studentAnswers?.motivation)}`,
+      `Education level: ${formatAnswer(studentAnswers?.educationLevel)}`,
     ];
 
     // For Tamil we keep labels in English to avoid layout issues; the AI-generated careers are Tamil.
@@ -67,7 +80,8 @@ window.PdfUtil = (() => {
 
       doc.setFontSize(14);
       doc.setFont(undefined, "bold");
-      doc.text(`${i + 1}. ${c.name}`, margin, y);
+      const icon = c.icon ? `${c.icon} ` : "";
+      doc.text(`${i + 1}. ${icon}${c.name}`, margin, y);
       y += 18;
       doc.setFont(undefined, "normal");
       doc.setFontSize(11);
@@ -86,6 +100,24 @@ window.PdfUtil = (() => {
       y += 12;
       const skillsText = (c.required_skills || []).map(s => `• ${s}`).join("\n");
       y += addWrappedText(doc, skillsText || "-", margin, y, maxWidth, lineHeight) + 10;
+
+      // Confidence
+      if (typeof c.confidence_percent === "number") {
+        doc.setFont(undefined, "bold");
+        doc.text(language === "ta" ? "பொருத்தம் (Confidence)" : "Match Confidence", margin, y);
+        doc.setFont(undefined, "normal");
+        y += 12;
+        y += addWrappedText(doc, `${c.confidence_percent}%`, margin, y, maxWidth, lineHeight) + 10;
+      }
+
+      // Why this fits you
+      if (c.why_this_fits_you) {
+        doc.setFont(undefined, "bold");
+        doc.text(language === "ta" ? "ஏன் இது பொருந்தும்" : "Why this fits you", margin, y);
+        doc.setFont(undefined, "normal");
+        y += 12;
+        y += addWrappedText(doc, c.why_this_fits_you || "", margin, y, maxWidth, lineHeight) + 10;
+      }
 
       // Future Demand
       doc.setFont(undefined, "bold");

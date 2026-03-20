@@ -22,17 +22,20 @@ Based on the student's answers below, suggest the best 5 career paths.
 
 Student Data:
 - Interests: {student_answers.get('interests', '')}
-- Favorite subjects: {student_answers.get('subjects', '')}
 - Skills (technical / soft skills): {student_answers.get('skills', '')}
 - Personality (introvert/extrovert): {student_answers.get('personality', '')}
 - Preferred work style (team/individual): {student_answers.get('workstyle', '')}
-- Career goals: {student_answers.get('goals', '')}
+- Risk appetite (low/medium/high): {student_answers.get('risk', '')}
+- Learning style: {student_answers.get('learningStyle', '')}
+- Career motivation: {student_answers.get('motivation', '')}
 - Education level: {student_answers.get('educationLevel', '')}
 
 For each career, provide the following:
 1) Career Name
 2) Description
 3) Required Skills (as an array of strings)
+4) Confidence percentage match (integer from 0 to 100)
+5) Why this fits the student (short, clear paragraph)
 4) Future Demand (a short paragraph)
 5) Learning Path (as an array of step strings, beginner-friendly)
 
@@ -42,8 +45,11 @@ JSON schema:
   "careers": [
     {{
       "name": "string",
+      "icon": "string (optional, short emoji/label)",
       "description": "string",
       "required_skills": ["string", "..."],
+      "confidence_percent": 0,
+      "why_this_fits_you": "string",
       "future_demand": "string",
       "learning_path": ["string", "..."]
     }}
@@ -90,11 +96,12 @@ def build_chat_messages(
     base_context = f"""
 Student answers:
 - interests: {student_answers.get('interests', '')}
-- subjects: {student_answers.get('subjects', '')}
 - skills: {student_answers.get('skills', '')}
 - personality: {student_answers.get('personality', '')}
 - workstyle: {student_answers.get('workstyle', '')}
-- goals: {student_answers.get('goals', '')}
+- risk: {student_answers.get('risk', '')}
+- learningStyle: {student_answers.get('learningStyle', '')}
+- motivation: {student_answers.get('motivation', '')}
 - educationLevel: {student_answers.get('educationLevel', '')}
 
 Previously suggested careers (JSON):
