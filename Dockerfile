@@ -9,7 +9,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/ .
 
+# Writable DB path in container (default config put DB under / — can fail on some hosts).
+ENV PYTHONUNBUFFERED=1
+ENV SQLITE_PATH=/tmp/career_app.sqlite
 EXPOSE 8000
 ENV PORT=8000
 
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# `exec` so uvicorn is PID 1 (signals). Bind :: for IPv6 (Railway internal routing).
+CMD exec uvicorn app.main:app --host :: --port "${PORT:-8000}"
