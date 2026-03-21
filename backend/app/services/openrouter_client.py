@@ -50,7 +50,11 @@ async def create_chat_completion(
         "X-OpenRouter-Title": "Career Guidance AI",
     }
 
-    async with httpx.AsyncClient(timeout=60) as client:
+    timeout = httpx.Timeout(
+        settings.openrouter_http_timeout,
+        connect=min(15.0, settings.openrouter_http_timeout),
+    )
+    async with httpx.AsyncClient(timeout=timeout) as client:
         resp = await client.post(OPENROUTER_CHAT_URL, json=payload, headers=headers)
 
     if resp.status_code < 200 or resp.status_code >= 300:

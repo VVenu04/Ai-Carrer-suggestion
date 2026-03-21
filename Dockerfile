@@ -15,5 +15,5 @@ ENV SQLITE_PATH=/tmp/career_app.sqlite
 EXPOSE 8000
 ENV PORT=8000
 
-# `exec` so uvicorn is PID 1 (signals). Bind :: for IPv6 (Railway internal routing).
-CMD exec uvicorn app.main:app --host :: --port "${PORT:-8000}"
+# `exec` so uvicorn is PID 1 (signals). 0.0.0.0 + proxy flags match Railway's reverse proxy.
+CMD exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}" --proxy-headers --forwarded-allow-ips='*'

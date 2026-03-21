@@ -32,6 +32,18 @@ else:
         load_dotenv(dotenv_path=example_path)
 
 
+def _default_skip_json_retry_on_railway() -> bool:
+    """Avoid a second OpenRouter round-trip on Railway (edge timeout ~60s → 502)."""
+    on_railway = bool(os.getenv("RAILWAY_ENVIRONMENT", "").strip())
+    skip = os.getenv("OPENROUTER_SKIP_JSON_RETRY", "").strip().lower()
+    allow = os.getenv("OPENROUTER_ALLOW_JSON_RETRY", "").strip().lower()
+    if skip in ("1", "true", "yes"):
+        return True
+    if skip in ("0", "false", "no") or allow in ("1", "true", "yes"):
+        return False
+    return on_railway
+
+
 class Settings:
     # Required: set this in backend/.env
     openrouter_api_key: str = os.getenv("OPENROUTER_API_KEY", "")
@@ -41,6 +53,12 @@ class Settings:
 
     # Optional tuning
     openrouter_temperature: float = float(os.getenv("OPENROUTER_TEMPERATURE", "0.7"))
+
+    # Outbound OpenRouter HTTP timeout (seconds). Railway edge often ~60s total; keep
+    # each upstream call under that to avoid 502 "Application failed to respond".
+    openrouter_http_timeout: float = float(os.getenv("OPENROUTER_HTTP_TIMEOUT", "55"))
+
+    openrouter_skip_json_retry: bool = _default_skip_json_retry_on_railway()
 
     # Database file
     sqlite_path: str = os.getenv("SQLITE_PATH", os.path.join(os.path.dirname(__file__), "..", "..", "career_app.sqlite"))

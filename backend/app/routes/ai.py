@@ -51,7 +51,7 @@ async def career_suggestions(req: CareerSuggestionsRequest) -> CareerSuggestions
 
     try:
         messages = build_career_suggestions_messages(student_answers, language)
-        output = await create_chat_completion(messages=messages, max_tokens=1400)
+        output = await create_chat_completion(messages=messages, max_tokens=1100)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI call failed: {e}")
 
@@ -60,10 +60,15 @@ async def career_suggestions(req: CareerSuggestionsRequest) -> CareerSuggestions
         careers = _parse_careers(output)
         ai_response = {"raw_output": output, "careers": [c.model_dump() for c in careers]}
     except Exception:
-        # One retry with fix-JSON instructions.
+        # Second OpenRouter call can exceed Railway's ~60s edge limit → 502. Optional skip via env.
+        if settings.openrouter_skip_json_retry:
+            raise HTTPException(
+                status_code=500,
+                detail="AI returned invalid JSON. Set OPENROUTER_ALLOW_JSON_RETRY=1 for one fix-up OpenRouter call (may exceed Railway timeout).",
+            )
         try:
             fix_messages = build_fix_json_messages(language, output)
-            fixed_output = await create_chat_completion(messages=fix_messages, max_tokens=1400)
+            fixed_output = await create_chat_completion(messages=fix_messages, max_tokens=750)
             careers = _parse_careers(fixed_output)
             ai_response = {"raw_output": fixed_output, "careers": [c.model_dump() for c in careers]}
         except Exception as e:

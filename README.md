@@ -98,6 +98,14 @@ This repo includes **`vercel.json`** at the project root so Vercel publishes the
 5. Add **`OPENROUTER_API_KEY`** (and optionally **`OPENROUTER_MODEL`**) in **Variables** — never commit real keys.
 6. **`backend/.env.example`** has no `OPENROUTER_API_KEY=...` assignment line (comments only).
 
+### Railway `502` — "Application failed to respond"
+
+Railway’s proxy often **times out around ~60s** while your app waits on **OpenRouter**. Then the browser/Postman sees **502**, not your FastAPI JSON error.
+
+- Confirm **`GET /health`** is fast; use **`POST /api/career-suggestions`** (not GET) with JSON.
+- **Public domain port** must match **`PORT`** in the container.
+- This repo: **`OPENROUTER_HTTP_TIMEOUT`** (default **55**s per outbound call), smaller career **`max_tokens`**, and **no JSON fix-up retry on Railway** by default (`RAILWAY_ENVIRONMENT` set) to stay under the edge limit. To allow the second fix-up call, set **`OPENROUTER_ALLOW_JSON_RETRY=1`** (may 502 if the model is slow).
+
 ## Notes
 - Voice recognition can require a Chromium-based browser and sometimes a secure context; Chrome usually works best locally on `localhost`.
 - The app uses permissive CORS (`*`) to simplify local testing.
