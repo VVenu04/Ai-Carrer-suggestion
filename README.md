@@ -91,8 +91,8 @@ This repo includes **`vercel.json`** at the project root so Vercel publishes the
 
 ## Deploy (Railway — backend)
 
-1. **Monorepo:** If Railway’s **Root Directory** is empty (repo root), use the root **`Dockerfile`** — it copies `backend/requirements.txt` and `backend/` (fixes `requirements.txt: not found` when context is the whole repo).
-2. **Root Directory = `backend`:** Use **`backend/Dockerfile`** (paths relative to `backend/`).
+1. **Root Directory:** leave **empty** / **repository root** (recommended). **`railway.toml`** forces the root **`Dockerfile`**, which copies `backend/` — this avoids Railway picking **`backend/Dockerfile`** with the wrong context (`requirements.txt: not found`).
+2. **Root Directory = `backend` only:** then **`backend/Dockerfile`** is correct (`COPY requirements.txt .`). Remove or adjust **`railway.toml`** if it conflicts, or rely on that layout only.
 3. **Docker** (not Railpack) avoids `secret OPENROUTER_API_KEY: not found` during build. Leave **Custom Start Command** empty so the image `CMD` runs, unless the UI requires an explicit uvicorn line.
 4. Add **`OPENROUTER_API_KEY`** (and optionally **`OPENROUTER_MODEL`**) in **Variables** — never commit real keys.
 5. **`backend/.env.example`** has no `OPENROUTER_API_KEY=...` assignment line (comments only).
