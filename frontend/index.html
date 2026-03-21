@@ -3,7 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Production: set content to your deployed API URL (e.g. https://your-api.onrender.com) -->
+    <meta name="career-api-base" content="" />
     <title>Career Guidance AI</title>
+    <!-- Premium Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   </head>
@@ -24,6 +30,10 @@
             <option value="en">English</option>
             <option value="ta">தமிழ்</option>
           </select>
+        </div>
+
+        <div class="theme-wrap">
+          <button id="themeToggle" class="btn ghost" type="button">Light</button>
         </div>
       </header>
 
@@ -58,6 +68,12 @@
               <div>
                 <div class="panel-title" id="qTitle">Career Questions</div>
                 <div class="panel-subtitle" id="qSubTitle">Step <span id="qStep">1</span> of <span id="qTotal">7</span></div>
+                <div class="progress-wrap">
+                  <div class="progress-bar" aria-hidden="true">
+                    <div id="progressFill" class="progress-fill"></div>
+                  </div>
+                  <div id="progressLabel" class="hint" style="margin-top:6px;"></div>
+                </div>
               </div>
 
               <div class="voice-status" id="voiceStatus" aria-live="polite"></div>
@@ -66,13 +82,12 @@
             <div class="question-block">
               <div class="question-text" id="questionPrompt">Question goes here</div>
 
+              <div id="questionHint" class="support-hint"></div>
+
               <div class="input-row">
-                <textarea
-                  id="answerInput"
-                  class="textarea"
-                  rows="4"
-                  placeholder="Type your answer here..."
-                ></textarea>
+                <div class="options-wrap">
+                  <div id="optionsContainer" class="options-grid"></div>
+                </div>
 
                 <button id="micAnswerBtn" class="icon-btn mic-btn small" aria-label="Speak answer">
                   <span class="mic-icon">🎤</span>
@@ -93,6 +108,39 @@
               <div class="typing-bubble" id="typingBubble" style="display:none;">
                 <span></span><span></span><span></span>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- REVIEW -->
+        <section id="reviewView" class="view">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title" id="reviewTitle">Review Your Answers</div>
+                <div class="panel-subtitle" id="reviewSubtitle">Check your selections before generating results.</div>
+              </div>
+              <div class="voice-status" id="reviewVoiceStatus" aria-live="polite"></div>
+            </div>
+
+            <div class="question-block" style="grid-column: 1 / 2;">
+              <div class="question-text">Your Summary</div>
+              <div id="reviewSummary" class="review-summary"></div>
+              <div class="support-hint" id="reviewHint">
+                You can go back to edit any step.
+              </div>
+            </div>
+
+            <div class="avatar-area" style="grid-column: 2 / 3;">
+              <div class="avatar" aria-hidden="true"></div>
+              <div class="typing-bubble" id="reviewTypingBubble" style="display:none;">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+
+            <div class="actions-row" style="grid-column: 1 / -1;">
+              <button id="reviewBackBtn" class="btn ghost">Back</button>
+              <button id="generateBtn" class="btn primary">Generate Career Suggestions</button>
             </div>
           </div>
         </section>
@@ -152,7 +200,7 @@
     <script src="pdf.js"></script>
     <script src="voice.js"></script>
     <script src="chat.js"></script>
-    <script src="app.js"></script>
+    <script src="premium_app.js"></script>
   </body>
 </html>
 

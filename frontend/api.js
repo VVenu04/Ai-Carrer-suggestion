@@ -1,5 +1,13 @@
 window.ApiClient = (() => {
-  const API_BASE = window.API_BASE || "http://localhost:8000";
+  function readApiBaseFromMeta() {
+    const el = document.querySelector('meta[name="career-api-base"]');
+    const v = el && el.getAttribute("content");
+    return v && v.trim() ? v.trim() : "";
+  }
+  const API_BASE =
+    window.API_BASE ||
+    readApiBaseFromMeta() ||
+    "http://localhost:8000";
 
   async function postJson(path, body) {
     const res = await fetch(`${API_BASE}${path}`, {

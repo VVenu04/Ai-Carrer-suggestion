@@ -79,6 +79,16 @@ Results are saved in **SQLite** and shown on the output page. You can also:
    - Verify the UI shows an error toast instead of silently failing
    - Use a browser without SpeechRecognition support and verify the app shows the “type your answer” hint
 
+## Deploy (Vercel — frontend only)
+
+This repo includes **`vercel.json`** at the project root so Vercel publishes the **`frontend/`** folder (fixes **404 NOT_FOUND** when the repo root had no `index.html`).
+
+1. Import the repo in Vercel (root stays the **repository root** — do not set Root Directory to `frontend` unless you remove or adjust `vercel.json`).
+2. **Backend** is not run by this static deploy. Host FastAPI elsewhere (Render, Railway, Fly.io, etc.) and allow CORS for your Vercel domain.
+3. Point the UI at your API:
+   - Edit **`frontend/index.html`**: set `<meta name="career-api-base" content="https://your-api.example.com" />` (no trailing slash), **or**
+   - Before `api.js` loads, set `window.API_BASE = "https://your-api.example.com"` in an inline script.
+
 ## Notes
 - Voice recognition can require a Chromium-based browser and sometimes a secure context; Chrome usually works best locally on `localhost`.
 - The app uses permissive CORS (`*`) to simplify local testing.
