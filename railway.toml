@@ -1,0 +1,5 @@
+# Force the monorepo-root Dockerfile (copies backend/). Without this, Railway may
+# pick backend/Dockerfile while the context is still the repo root → requirements.txt not found.
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"

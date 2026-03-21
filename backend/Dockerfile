@@ -1,8 +1,5 @@
-# Use this Dockerfile only when Docker **build context** is the `backend/` folder
-# (e.g. Railway **Root Directory** = `backend`). For monorepo root context, use the
-# `Dockerfile` at the repository root instead.
-#
-# Avoids Railpack build-time OPENROUTER_API_KEY secret issues when using Docker.
+# Use when Railway **Root Directory** is set to `backend` (build context = this folder).
+# If Root Directory is the **repo root**, Railway should use the root `Dockerfile` + `railway.toml`.
 FROM python:3.12-slim
 
 WORKDIR /app
@@ -15,5 +12,4 @@ COPY . .
 EXPOSE 8000
 ENV PORT=8000
 
-# Railway sets $PORT at runtime
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
