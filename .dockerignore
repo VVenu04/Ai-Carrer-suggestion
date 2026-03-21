@@ -1,0 +1,14 @@
+.git
+.github
+frontend
+**/__pycache__
+**/*.pyc
+.env
+.env.*
+backend/.env
+backend/.env.local
+backend/.venv
+backend/venv
+*.sqlite
+**/.pytest_cache
+README.md

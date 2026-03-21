@@ -79,11 +79,6 @@ Results are saved in **SQLite** and shown on the output page. You can also:
    - Verify the UI shows an error toast instead of silently failing
    - Use a browser without SpeechRecognition support and verify the app shows the “type your answer” hint
 
-<<<<<<< Updated upstream
-=======
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
 ## Deploy (Vercel — frontend only)
 
 This repo includes **`vercel.json`** at the project root so Vercel publishes the **`frontend/`** folder (fixes **404 NOT_FOUND** when the repo root had no `index.html`).
@@ -96,19 +91,12 @@ This repo includes **`vercel.json`** at the project root so Vercel publishes the
 
 ## Deploy (Railway — backend)
 
-1. **Root Directory:** `backend` (if the repo is a monorepo).
-<<<<<<< Updated upstream
-2. **Build:** `pip install -r requirements.txt` · **Start:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-3. Add **`OPENROUTER_API_KEY`** (and optionally **`OPENROUTER_MODEL`**) in the service **Variables** tab — never commit real keys.
-4. **`backend/.env.example`** keeps `OPENROUTER_API_KEY` **empty** on purpose so **Railpack** does not fail the build with `secret OPENROUTER_API_KEY not found`. Your app reads the key at **runtime** from Railway’s environment.
+1. **Monorepo:** If Railway’s **Root Directory** is empty (repo root), use the root **`Dockerfile`** — it copies `backend/requirements.txt` and `backend/` (fixes `requirements.txt: not found` when context is the whole repo).
+2. **Root Directory = `backend`:** Use **`backend/Dockerfile`** (paths relative to `backend/`).
+3. **Docker** (not Railpack) avoids `secret OPENROUTER_API_KEY: not found` during build. Leave **Custom Start Command** empty so the image `CMD` runs, unless the UI requires an explicit uvicorn line.
+4. Add **`OPENROUTER_API_KEY`** (and optionally **`OPENROUTER_MODEL`**) in **Variables** — never commit real keys.
+5. **`backend/.env.example`** has no `OPENROUTER_API_KEY=...` assignment line (comments only).
 
-=======
-2. **`backend/Dockerfile`** is included so Railway can use **Docker** instead of **Railpack** (Railpack was failing with `secret OPENROUTER_API_KEY: not found` even when the key was only needed at runtime). After deploy, Railway should detect the Dockerfile automatically; you can leave **Custom Start Command** empty so the image’s `CMD` runs, or set the same uvicorn line if the UI requires it.
-3. Add **`OPENROUTER_API_KEY`** (and optionally **`OPENROUTER_MODEL`**) in the service **Variables** tab — never commit real keys.
-4. **`backend/.env.example`** has **no** `OPENROUTER_API_KEY=...` line (only comments) so nothing in Git looks like an env secret file to automated builders.
-
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 ## Notes
 - Voice recognition can require a Chromium-based browser and sometimes a secure context; Chrome usually works best locally on `localhost`.
 - The app uses permissive CORS (`*`) to simplify local testing.
