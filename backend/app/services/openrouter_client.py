@@ -21,7 +21,18 @@ async def create_chat_completion(
     """
     api_key = settings.openrouter_api_key
     if not api_key:
-        raise RuntimeError("Missing OPENROUTER_API_KEY in backend/.env")
+        raise RuntimeError(
+            "Missing OPENROUTER_API_KEY. Expected it in one of: "
+            "backend/.env, backend/.env.local, or (if you edited it) backend/.env.example."
+        )
+
+    # Lightweight sanity check to help users diagnose "401 User not found".
+    # OpenRouter keys usually start with "sk-or-".
+    if not str(api_key).startswith("sk-or-"):
+        raise RuntimeError(
+            "OPENROUTER_API_KEY does not look like an OpenRouter key (expected prefix 'sk-or-'). "
+            "If you pasted the wrong key/account, update it and restart the backend."
+        )
 
     payload: Dict[str, Any] = {
         "model": model or settings.openrouter_model,

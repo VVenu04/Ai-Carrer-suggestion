@@ -8,6 +8,7 @@ window.PremiumCareerApp = (() => {
     voiceMode: false,
     sessionId: null,
     careers: [],
+    interestsPage: 0,
     // Answers collected from the wizard
     answers: {
       interests: [], // array of interest ids
@@ -317,6 +318,17 @@ window.PremiumCareerApp = (() => {
     return flat;
   }
 
+  const INTERESTS_PAGE_SIZE = 10;
+
+  function getInterestsPage() {
+    const flat = getInterestsFlat();
+    const totalPages = Math.max(1, Math.ceil(flat.length / INTERESTS_PAGE_SIZE));
+    const page = Math.min(totalPages - 1, Math.max(0, state.interestsPage || 0));
+    const start = page * INTERESTS_PAGE_SIZE;
+    const options = flat.slice(start, start + INTERESTS_PAGE_SIZE);
+    return { flat, totalPages, page, options };
+  }
+
   function getSkillsFlat() {
     return catalog.skills.map((s) => ({ ...s }));
   }
@@ -384,60 +396,66 @@ window.PremiumCareerApp = (() => {
 
   function renderInterests() {
     els.questionPrompt.textContent = state.language === "ta" ? "உங்கள் ஆர்வங்கள் என்ன?" : "What are your interests?";
-    els.questionHint.textContent = state.language === "ta" ? "பலவற்றை தேர்ந்தெடுக்கலாம்." : "You can select multiple.";
+    const { totalPages, page } = getInterestsPage();
+    els.questionHint.textContent = state.language === "ta"
+      ? `பலவற்றை தேர்ந்தெடுக்கலாம். (பக்கம் ${page + 1} / ${totalPages})`
+      : `Select multiple. (Page ${page + 1} / ${totalPages})`;
     clearOptions();
 
-    const flat = getInterestsFlat();
-    buildNumberMapFromOptions(flat.map(({ id, label, emoji }) => ({ id, label, emoji })));
+    const { options, totalPages: tp, page: pg } = getInterestsPage();
 
-    // Category blocks
-    const byCat = new Map();
-    catalog.interests.forEach((cat) => {
-      byCat.set(cat.category, cat.options);
-    });
+    // Number only the visible options for the voice flow.
+    buildNumberMapFromOptions(options.map(({ id, label, emoji }) => ({ id, label, emoji })));
 
-    const container = document.createElement("div");
-    container.style.display = "grid";
-    container.style.gridTemplateColumns = "1fr 1fr";
-    container.style.gap = "10px";
-
-    catalog.interests.forEach((cat) => {
-      const catBlock = document.createElement("div");
-      catBlock.style.background = "rgba(255,255,255,0.03)";
-      catBlock.style.border = "1px solid rgba(255,255,255,0.10)";
-      catBlock.style.borderRadius = "16px";
-      catBlock.style.padding = "10px";
-      catBlock.innerHTML = `<div style="font-weight:900;margin-bottom:8px;color:var(--muted);">${escapeHtml(cat.emoji + " " + cat.category)}</div>`;
-
-      catBlock.style.display = "flex";
-      catBlock.style.flexDirection = "column";
-      catBlock.style.gap = "8px";
-
-      cat.options.forEach((opt) => {
-        const number = flat.findIndex((x) => x.id === opt.id) + 1;
-        const selected = state.answers.interests.includes(opt.id);
-        const card = document.createElement("div");
-        card.className = "option-card" + (selected ? " selected" : "");
-        card.dataset.type = "interests";
-        card.dataset.id = opt.id;
-        card.innerHTML = `
-          <div class="option-emoji">${escapeHtml(opt.emoji || cat.emoji)}</div>
-          <div style="flex:1;">
-            <div class="option-label">${escapeHtml(opt.label)}</div>
-            <div class="option-sub">${escapeHtml(`Option ${number}`)}</div>
-          </div>
-        `;
-        card.addEventListener("click", () => {
-          toggleMultiAnswer("interests", opt.id);
-          renderStep();
-        });
-        catBlock.appendChild(card);
+    els.optionsContainer.style.gridTemplateColumns = "1fr 1fr";
+    options.forEach((opt, idx) => {
+      const number = idx + 1;
+      const selected = state.answers.interests.includes(opt.id);
+      const card = document.createElement("div");
+      card.className = "option-card" + (selected ? " selected" : "");
+      card.dataset.type = "interests";
+      card.dataset.id = opt.id;
+      card.innerHTML = `
+        <div class="option-emoji">${escapeHtml(opt.emoji || "✨")}</div>
+        <div style="flex:1;">
+          <div class="option-label">${escapeHtml(opt.label)}</div>
+          <div class="option-sub">${escapeHtml(`Option ${number}`)}</div>
+        </div>
+      `;
+      card.addEventListener("click", () => {
+        toggleMultiAnswer("interests", opt.id);
+        renderStep();
       });
-
-      container.appendChild(catBlock);
+      els.optionsContainer.appendChild(card);
     });
 
-    els.optionsContainer.appendChild(container);
+    // Page navigation (keeps selections across pages)
+    if (tp > 1) {
+      const nav = document.createElement("div");
+      nav.style.gridColumn = "1 / -1";
+      nav.style.display = "flex";
+      nav.style.justifyContent = "space-between";
+      nav.style.alignItems = "center";
+      nav.style.gap = "10px";
+      nav.style.marginTop = "12px";
+      nav.innerHTML = `
+        <button class="btn ghost small" type="button" id="interestsPrevBtn" ${pg <= 0 ? "disabled" : ""}>Prev</button>
+        <div class="hint" style="font-weight:800;">${escapeHtml(`Page ${pg + 1} / ${tp}`)}</div>
+        <button class="btn ghost small" type="button" id="interestsNextBtn" ${pg >= tp - 1 ? "disabled" : ""}>Next</button>
+      `;
+      els.optionsContainer.appendChild(nav);
+
+      const prevBtn = document.getElementById("interestsPrevBtn");
+      const nextBtn = document.getElementById("interestsNextBtn");
+      prevBtn?.addEventListener("click", () => {
+        state.interestsPage = Math.max(0, state.interestsPage - 1);
+        renderStep();
+      });
+      nextBtn?.addEventListener("click", () => {
+        state.interestsPage = Math.min(tp - 1, state.interestsPage + 1);
+        renderStep();
+      });
+    }
   }
 
   function renderSkillsSelect() {
@@ -758,8 +776,8 @@ window.PremiumCareerApp = (() => {
     const key = steps[state.stepIndex].key;
 
     if (key === "interests") {
-      const flat = getInterestsFlat();
-      buildNumberMapFromOptions(flat.map((o) => ({ id: o.id, label: o.label, emoji: o.emoji })));
+      const { options } = getInterestsPage();
+      buildNumberMapFromOptions(options.map((o) => ({ id: o.id, label: o.label, emoji: o.emoji })));
       const pickedIds = [];
       nums.forEach((n) => {
         const m = currentNumberMap.get(n);
@@ -876,13 +894,14 @@ window.PremiumCareerApp = (() => {
     const langIsTa = state.language === "ta";
 
     if (key === "interests") {
-      const flat = getInterestsFlat();
-      buildNumberMapFromOptions(flat.map((o) => ({ id: o.id, label: o.label, emoji: o.emoji })));
+      const { options, page, totalPages } = getInterestsPage();
+      buildNumberMapFromOptions(options.map((o) => ({ id: o.id, label: o.label, emoji: o.emoji })));
       const title = langIsTa ? "உங்கள் ஆர்வங்களை தேர்ந்தெடுக்கவும்." : "Choose your interests.";
-      const optionsText = flat
+      const optionsText = options
         .map((o, idx) => `${idx + 1}. ${o.label}`)
         .join(", ");
-      return `${title} ${optionsText}.`;
+      const pageText = langIsTa ? `பக்கம் ${page + 1}/${totalPages}` : `Page ${page + 1}/${totalPages}`;
+      return `${title} ${pageText}. ${optionsText}.`;
     }
 
     if (key === "skillsSelect") {
@@ -995,7 +1014,29 @@ window.PremiumCareerApp = (() => {
       els.voiceStatus.textContent = "";
       if (window.VoiceAssistant?.setMicPulsing) window.VoiceAssistant.setMicPulsing(els.micAnswerBtn, false);
 
-      if (stepKey === "skillsLevels") {
+      if (stepKey === "interests") {
+        const { totalPages } = getInterestsPage();
+        // Ask for interests page-by-page (so the user can pick from all options).
+        while (true) {
+          renderStep();
+          try {
+            setLoadingOverlay(true);
+            await speak(buildTtsForCurrentStep());
+          } catch {
+            // TTS optional
+          } finally {
+            setLoadingOverlay(false);
+          }
+
+          await listenAndFillCurrentStep();
+
+          if (state.interestsPage >= totalPages - 1) break;
+          state.interestsPage += 1;
+        }
+
+        els.nextBtn.disabled = !validateCurrentStep();
+        await waitForNextClick();
+      } else if (stepKey === "skillsLevels") {
         // Voice mode needs to ask for each selected skill level.
         const selectedSkillIds = Object.keys(state.answers.skills);
         while (state.skillLevelSubIndex < selectedSkillIds.length) {
@@ -1060,6 +1101,7 @@ window.PremiumCareerApp = (() => {
   function resetAll() {
     state.sessionId = null;
     state.careers = [];
+    state.interestsPage = 0;
     state.answers = {
       interests: [],
       skills: {},
