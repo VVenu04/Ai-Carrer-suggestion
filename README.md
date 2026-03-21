@@ -89,6 +89,13 @@ This repo includes **`vercel.json`** at the project root so Vercel publishes the
    - Edit **`frontend/index.html`**: set `<meta name="career-api-base" content="https://your-api.example.com" />` (no trailing slash), **or**
    - Before `api.js` loads, set `window.API_BASE = "https://your-api.example.com"` in an inline script.
 
+## Deploy (Railway — backend)
+
+1. **Root Directory:** `backend` (if the repo is a monorepo).
+2. **Build:** `pip install -r requirements.txt` · **Start:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+3. Add **`OPENROUTER_API_KEY`** (and optionally **`OPENROUTER_MODEL`**) in the service **Variables** tab — never commit real keys.
+4. **`backend/.env.example`** keeps `OPENROUTER_API_KEY` **empty** on purpose so **Railpack** does not fail the build with `secret OPENROUTER_API_KEY not found`. Your app reads the key at **runtime** from Railway’s environment.
+
 ## Notes
 - Voice recognition can require a Chromium-based browser and sometimes a secure context; Chrome usually works best locally on `localhost`.
 - The app uses permissive CORS (`*`) to simplify local testing.
